@@ -1,79 +1,47 @@
 import type { Recipe } from './types.ts';
 
-// ค่าคงที่ของอัลกอริทึมตามสเปก (docs/FridgeChef Spec.dc.html §02)
-export const MIN_COVERAGE = 0.5;
-export const PROTEIN_BONUS = 10;
-export const MISSING_PENALTY = 4;
-export const MAX_CANDIDATES = 6;
-export const WEIGHT_POWER = 2;
+// ต่างจากสเปก §02 (coverage + คะแนน + weighted random): เข้ารอบเฉพาะเมนูที่
+// วัตถุดิบครบทำได้จริง แล้วสุ่ม uniform — ผู้ใช้ต้องไม่ได้เมนูที่ขาดของ
 
-export interface ScoredRecipe {
-  recipe: Recipe;
-  score: number;
-  /** สัดส่วนวัตถุดิบหลักที่มี (0–1) */
-  coverage: number;
-  haveIds: string[];
-  missingIds: string[];
-}
+/** จำนวนตัวเลือกสำรองสูงสุดที่แสดงบนหน้าผลลัพธ์ (ไม่จำกัดจำนวนเมนูที่เข้ารอบ) */
+export const MAX_ALTERNATES = 6;
 
 /**
- * ขั้น Filter + Score: คืน null เมื่อขาดวัตถุดิบบังคับ
- * คะแนน = coverage×100 + โบนัสโปรตีน − ที่ขาด×ค่าปรับ
+ * เมนูที่ทำได้จริง: วัตถุดิบบังคับและวัตถุดิบหลักที่ไม่ใช่โปรตีนต้องมีครบทุกตัว
+ * ส่วนโปรตีนเป็นทางเลือก — มีตัวใดตัวหนึ่งก็พอ (เช่น ไข่เจียวใช้ไข่ ไม่มีหมูสับก็ได้)
  */
-export function scoreRecipe(recipe: Recipe, fridge: ReadonlySet<string>): ScoredRecipe | null {
+export function canCook(recipe: Recipe, fridge: ReadonlySet<string>): boolean {
   for (const id of recipe.requiredIngredientIds) {
-    if (!fridge.has(id)) return null;
+    if (!fridge.has(id)) return false;
   }
-  const core = recipe.coreIngredientIds;
-  const haveIds = core.filter((id) => fridge.has(id));
-  const missingIds = core.filter((id) => !fridge.has(id));
-  const coverage = core.length === 0 ? 0 : haveIds.length / core.length;
-  const proteinOk =
-    recipe.proteinIngredientIds.length === 0 ||
-    recipe.proteinIngredientIds.some((id) => fridge.has(id))
-      ? 1
-      : 0;
-  const score = Math.round(
-    coverage * 100 + proteinOk * PROTEIN_BONUS - missingIds.length * MISSING_PENALTY,
-  );
-  return { recipe, score, coverage, haveIds, missingIds };
+  const proteins = recipe.proteinIngredientIds;
+  if (proteins.length > 0 && !proteins.some((id) => fridge.has(id))) return false;
+  const proteinSet = new Set(proteins);
+  for (const id of recipe.coreIngredientIds) {
+    if (!proteinSet.has(id) && !fridge.has(id)) return false;
+  }
+  return true;
 }
 
-/** เมนูเข้ารอบ: ผ่าน filter, coverage ถึงเกณฑ์, เรียงคะแนนมาก→น้อย, ตัดที่ MAX_CANDIDATES */
-export function getCandidates(recipes: Recipe[], fridgeIds: Iterable<string>): ScoredRecipe[] {
+/** เมนูเข้ารอบ = ทุกเมนูที่ทำได้จริง คงลำดับตาม input — การสุ่มเกิดตอน pick */
+export function getCandidates(recipes: Recipe[], fridgeIds: Iterable<string>): Recipe[] {
   const fridge = new Set(fridgeIds);
-  return recipes
-    .map((r) => scoreRecipe(r, fridge))
-    .filter((s): s is ScoredRecipe => s !== null && s.coverage >= MIN_COVERAGE)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_CANDIDATES);
+  return recipes.filter((r) => canCook(r, fridge));
 }
 
-/** Weighted random: น้ำหนัก = score^WEIGHT_POWER — คะแนนสูงถูกเลือกบ่อยกว่าแต่ตัวรองยังมีลุ้น */
-export function weightedPick(
-  candidates: ScoredRecipe[],
-  rng: () => number = Math.random,
-): ScoredRecipe | null {
+/** สุ่ม uniform — ทุกเมนูที่ทำได้มีโอกาสเท่ากัน */
+export function randomPick(candidates: Recipe[], rng: () => number = Math.random): Recipe | null {
   if (candidates.length === 0) return null;
-  const weights = candidates.map((c) => Math.pow(c.score, WEIGHT_POWER));
-  const total = weights.reduce((a, b) => a + b, 0);
-  let r = rng() * total;
-  for (let i = 0; i < candidates.length; i++) {
-    r -= weights[i]!;
-    if (r <= 0) return candidates[i]!;
-  }
-  return candidates[0]!;
+  return candidates[Math.min(Math.floor(rng() * candidates.length), candidates.length - 1)]!;
 }
 
 /** สุ่มใหม่ต้องไม่ได้เมนูเดิม เว้นแต่เหลือ candidate ตัวเดียว */
 export function rerollPick(
-  candidates: ScoredRecipe[],
+  candidates: Recipe[],
   currentRecipeId: string | null,
   rng: () => number = Math.random,
-): ScoredRecipe | null {
+): Recipe | null {
   const pool =
-    currentRecipeId === null
-      ? candidates
-      : candidates.filter((c) => c.recipe.id !== currentRecipeId);
-  return weightedPick(pool.length > 0 ? pool : candidates, rng);
+    currentRecipeId === null ? candidates : candidates.filter((r) => r.id !== currentRecipeId);
+  return randomPick(pool.length > 0 ? pool : candidates, rng);
 }

@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-  MAX_CANDIDATES,
-  MIN_COVERAGE,
+  canCook,
   getCandidates,
+  randomPick,
   rerollPick,
-  scoreRecipe,
   seedIngredients,
   seedRecipes,
-  weightedPick,
 } from '../src/index.ts';
 
 const recipeById = (id: string) => {
@@ -16,77 +14,79 @@ const recipeById = (id: string) => {
   return r;
 };
 
-describe('scoreRecipe', () => {
-  it('คืน null เมื่อขาดวัตถุดิบบังคับ (กะเพราไก่ไม่มีใบกะเพรา)', () => {
+describe('canCook', () => {
+  it('ขาดวัตถุดิบบังคับ → ทำไม่ได้ (กะเพราไก่ไม่มีใบกะเพรา)', () => {
     const fridge = new Set(['chicken', 'chili', 'garlic']);
-    expect(scoreRecipe(recipeById('pad-kra-pao-gai'), fridge)).toBeNull();
+    expect(canCook(recipeById('pad-kra-pao-gai'), fridge)).toBe(false);
   });
 
-  it('วัตถุดิบครบ = coverage 1 และได้โบนัสโปรตีน (100 + 10)', () => {
+  it('ไม่มีโปรตีนของเมนูเลย → ทำไม่ได้ (หมูผัดกระเทียมมีแต่ไก่)', () => {
     const fridge = new Set(['chicken', 'holy-basil', 'chili', 'garlic']);
-    const scored = scoreRecipe(recipeById('pad-kra-pao-gai'), fridge);
-    expect(scored).not.toBeNull();
-    expect(scored!.coverage).toBe(1);
-    expect(scored!.score).toBe(110);
-    expect(scored!.missingIds).toEqual([]);
+    expect(canCook(recipeById('moo-pad-kratiam'), fridge)).toBe(false);
   });
 
-  it('หักคะแนนตามวัตถุดิบที่ขาด และไม่ได้โบนัสถ้าไม่มีโปรตีนตรง', () => {
-    // หมูผัดกระเทียม: core = [pork, garlic], มีแค่ garlic → coverage 0.5, ไม่มีโบนัส, หัก 4
+  it('ขาดวัตถุดิบหลักที่ไม่ใช่โปรตีน → ทำไม่ได้ (กะเพราไก่ขาดพริก)', () => {
+    const fridge = new Set(['chicken', 'holy-basil', 'garlic']);
+    expect(canCook(recipeById('pad-kra-pao-gai'), fridge)).toBe(false);
+  });
+
+  it('วัตถุดิบครบทุกตัว → ทำได้', () => {
     const fridge = new Set(['chicken', 'holy-basil', 'chili', 'garlic']);
-    const scored = scoreRecipe(recipeById('moo-pad-kratiam'), fridge);
-    expect(scored).not.toBeNull();
-    expect(scored!.coverage).toBe(0.5);
-    expect(scored!.score).toBe(50 - 4);
-    expect(scored!.missingIds).toEqual(['pork']);
+    expect(canCook(recipeById('pad-kra-pao-gai'), fridge)).toBe(true);
   });
 
-  it('เมนูไม่มีโปรตีน (ผัดผักบุ้ง) ได้โบนัสเสมอ', () => {
-    const fridge = new Set(['morning-glory', 'garlic', 'chili']);
-    const scored = scoreRecipe(recipeById('pad-pak-boong'), fridge);
-    expect(scored!.score).toBe(110);
+  it('โปรตีนแบบทางเลือก: มีตัวเดียวก็ทำได้ (ไข่เจียวมีไข่แต่ไม่มีหมูสับ)', () => {
+    expect(canCook(recipeById('khai-jiao'), new Set(['egg']))).toBe(true);
+  });
+
+  it('โปรตีนทางเลือกอย่างเดียวแทนวัตถุดิบบังคับไม่ได้ (ไข่เจียวมีแต่หมูสับ ไม่มีไข่)', () => {
+    expect(canCook(recipeById('khai-jiao'), new Set(['pork-minced']))).toBe(false);
   });
 });
 
 describe('getCandidates', () => {
-  it('สถานการณ์ตามสเปก: ไก่+กะเพรา+พริก+กระเทียม → กะเพราไก่คะแนนสูงสุด และมีไก่ผัดกระเทียมเข้ารอบ', () => {
-    const cands = getCandidates(seedRecipes, ['chicken', 'holy-basil', 'chili', 'garlic']);
-    expect(cands.length).toBeGreaterThan(0);
-    const ids = cands.map((c) => c.recipe.id);
-    expect(cands[0]!.score).toBe(110);
-    expect(ids.slice(0, 2)).toContain('pad-kra-pao-gai');
-    expect(ids).toContain('gai-pad-kratiam');
-    // เรียงคะแนนมาก → น้อยเสมอ
-    for (let i = 1; i < cands.length; i++) {
-      expect(cands[i - 1]!.score).toBeGreaterThanOrEqual(cands[i]!.score);
+  it('คืนเฉพาะเมนูที่ทำได้จริง และคงลำดับตาม seed', () => {
+    const fridge = ['chicken', 'holy-basil', 'chili', 'garlic'];
+    const cands = getCandidates(seedRecipes, fridge);
+    expect(cands.map((r) => r.id)).toContain('pad-kra-pao-gai');
+    const fridgeSet = new Set(fridge);
+    for (const r of cands) expect(canCook(r, fridgeSet)).toBe(true);
+  });
+
+  it('เคยเกิดจริง: เลือกไก่แล้วสุ่มได้เมนูกุ้ง — ต้องไม่เกิดอีก', () => {
+    const cands = getCandidates(seedRecipes, ['chicken', 'cooked-rice', 'egg', 'garlic', 'chili']);
+    const ids = cands.map((r) => r.id);
+    expect(ids).not.toContain('khao-pad-goong');
+    expect(ids).not.toContain('pad-kra-pao-goong');
+    for (const r of cands) {
+      for (const id of r.coreIngredientIds) {
+        if (!r.proteinIngredientIds.includes(id)) {
+          expect(['chicken', 'cooked-rice', 'egg', 'garlic', 'chili']).toContain(id);
+        }
+      }
     }
   });
 
-  it(`ตัดเมนูที่ coverage < ${MIN_COVERAGE} ทิ้ง`, () => {
-    // ต้มยำกุ้ง core 7 ตัว มีแค่กุ้ง (required ผ่าน) → coverage 1/7 ต้องไม่เข้ารอบ
-    const cands = getCandidates(seedRecipes, ['shrimp']);
-    expect(cands.map((c) => c.recipe.id)).not.toContain('tom-yum-goong');
+  it('เลือกทุกอย่างในตู้เย็น → ทุกเมนูเข้ารอบ (ไม่มี cap ที่ขั้นนี้แล้ว)', () => {
+    const all = seedIngredients.map((i) => i.id);
+    expect(getCandidates(seedRecipes, all).length).toBe(seedRecipes.length);
   });
 
-  it(`เลือกทุกอย่างในตู้เย็น → เข้ารอบไม่เกิน ${MAX_CANDIDATES} เมนู`, () => {
-    const all = seedIngredients.map((i) => i.id);
-    const cands = getCandidates(seedRecipes, all);
-    expect(cands.length).toBe(MAX_CANDIDATES);
+  it('ไม่เลือกอะไรเลย → ไม่มีเมนูเข้ารอบ', () => {
+    expect(getCandidates(seedRecipes, [])).toEqual([]);
   });
 });
 
-describe('weightedPick', () => {
+describe('randomPick', () => {
   const cands = getCandidates(seedRecipes, ['chicken', 'holy-basil', 'chili', 'garlic']);
 
-  it('rng=0 ได้ตัวแรกเสมอ, rng ใกล้ 1 ได้ตัวท้ายๆ', () => {
-    expect(weightedPick(cands, () => 0)!.recipe.id).toBe(cands[0]!.recipe.id);
-    expect(weightedPick(cands, () => 0.999999)!.recipe.id).toBe(
-      cands[cands.length - 1]!.recipe.id,
-    );
+  it('rng=0 ได้ตัวแรกเสมอ, rng ใกล้ 1 ได้ตัวท้าย', () => {
+    expect(randomPick(cands, () => 0)!.id).toBe(cands[0]!.id);
+    expect(randomPick(cands, () => 0.999999)!.id).toBe(cands[cands.length - 1]!.id);
   });
 
   it('คืน null เมื่อไม่มี candidate', () => {
-    expect(weightedPick([], () => 0.5)).toBeNull();
+    expect(randomPick([], () => 0.5)).toBeNull();
   });
 });
 
@@ -94,17 +94,18 @@ describe('rerollPick', () => {
   const cands = getCandidates(seedRecipes, ['chicken', 'holy-basil', 'chili', 'garlic']);
 
   it('สุ่มใหม่ไม่ได้เมนูเดิม เมื่อมี candidate มากกว่า 1', () => {
-    const current = cands[0]!.recipe.id;
+    expect(cands.length).toBeGreaterThan(1);
+    const current = cands[0]!.id;
     for (let i = 0; i < 50; i++) {
       const picked = rerollPick(cands, current, Math.random);
-      expect(picked!.recipe.id).not.toBe(current);
+      expect(picked!.id).not.toBe(current);
     }
   });
 
   it('เหลือ candidate ตัวเดียว → ยอมคืนตัวเดิม', () => {
     const only = [cands[0]!];
-    const picked = rerollPick(only, cands[0]!.recipe.id, () => 0.5);
-    expect(picked!.recipe.id).toBe(cands[0]!.recipe.id);
+    const picked = rerollPick(only, cands[0]!.id, () => 0.5);
+    expect(picked!.id).toBe(cands[0]!.id);
   });
 });
 

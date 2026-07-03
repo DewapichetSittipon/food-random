@@ -1,24 +1,18 @@
-import { difficultyLabel, type ScoredRecipe } from '@fridgechef/shared';
+import { MAX_ALTERNATES, difficultyLabel, type Recipe } from '@fridgechef/shared';
 
 interface Props {
-  result: ScoredRecipe;
-  candidates: ScoredRecipe[];
-  ingredientNames: ReadonlyMap<string, string>;
-  onPick: (candidate: ScoredRecipe) => void;
+  result: Recipe;
+  candidates: Recipe[];
+  onPick: (recipe: Recipe) => void;
   onReroll: () => void;
   onBack: () => void;
 }
 
-export default function ResultScreen({
-  result,
-  candidates,
-  ingredientNames,
-  onPick,
-  onReroll,
-  onBack,
-}: Props) {
-  const r = result.recipe;
-  const hasMissing = result.missingIds.length > 0;
+export default function ResultScreen({ result, candidates, onPick, onReroll, onBack }: Props) {
+  const r = result;
+  // โชว์ตัวเลือกสำรองไม่เกิน MAX_ALTERNATES และเมนูที่เลือกอยู่ต้องติดชิปเสมอ
+  const alternates = candidates.slice(0, MAX_ALTERNATES);
+  if (!alternates.some((c) => c.id === r.id)) alternates[alternates.length - 1] = r;
 
   return (
     <div className="animate-pop mx-auto flex h-dvh max-w-md flex-col">
@@ -40,30 +34,10 @@ export default function ResultScreen({
       </header>
 
       <main className="flex-1 overflow-y-auto px-6 pt-5 pb-8">
-        <div
-          className={`rounded-2xl border px-4 py-3.5 ${
-            hasMissing
-              ? 'border-warn-line bg-warn-soft'
-              : 'border-ok-line bg-ok-soft text-ok-deep'
-          }`}
-        >
+        <div className="rounded-2xl border border-ok-line bg-ok-soft px-4 py-3.5 text-ok-deep">
           <div className="text-sm font-semibold">
-            {hasMissing
-              ? `มีวัตถุดิบหลัก ${result.haveIds.length}/${r.coreIngredientIds.length} — ขาดอีกนิดหน่อย`
-              : '✓ คุณมีวัตถุดิบหลักครบทุกอย่าง!'}
+            ✓ คุณมีวัตถุดิบหลักครบ ทำเมนูนี้ได้เลย
           </div>
-          {hasMissing && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {result.missingIds.map((id) => (
-                <span
-                  key={id}
-                  className="rounded-full border border-dashed border-warn-dash bg-white px-2.5 py-1 text-xs text-warn-deep"
-                >
-                  + {ingredientNames.get(id) ?? id}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         <section className="mt-6">
@@ -92,17 +66,17 @@ export default function ResultScreen({
           </ol>
         </section>
 
-        {candidates.length > 1 && (
+        {alternates.length > 1 && (
           <section className="mt-7 border-t border-line pt-5">
             <h2 className="mb-3 text-[13px] font-semibold text-ink-faint">
               🔀 ตัวเลือกสำรอง (แตะเพื่อสลับ)
             </h2>
             <div className="flex flex-wrap gap-2">
-              {candidates.map((c) => {
-                const active = c.recipe.id === r.id;
+              {alternates.map((c) => {
+                const active = c.id === r.id;
                 return (
                   <button
-                    key={c.recipe.id}
+                    key={c.id}
                     type="button"
                     onClick={() => onPick(c)}
                     className={`min-h-9 cursor-pointer rounded-full border-[1.5px] px-3 text-[12.5px] font-medium ${
@@ -111,7 +85,7 @@ export default function ResultScreen({
                         : 'border-chip-line bg-white text-ink-soft'
                     }`}
                   >
-                    {c.recipe.name} · {c.score}
+                    {c.name}
                   </button>
                 );
               })}
