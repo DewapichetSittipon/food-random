@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ingredient {
+  id        String             @id
+  name      String
+  group     String
+  sortOrder Int                @default(0)
+  recipes   RecipeIngredient[]
+
+  @@map("ingredients")
+}
+
+model Recipe {
+  id          String             @id
+  name        String
+  template    String
+  category    String
+  difficulty  Int
+  cookTime    Int
+  servings    Int
+  /// { name, amount }[] — เครื่องปรุงไม่มีตัวตนข้ามสูตร (CONTEXT.md: Seasoning)
+  seasonings  Json
+  steps       String[]
+  tags        String[]
+  updatedAt   DateTime           @updatedAt
+  ingredients RecipeIngredient[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  recipeId     String
+  ingredientId String
+  /// วัตถุดิบบังคับ — ผู้ใช้ไม่มีแล้วสูตรถูกกรองทิ้งทั้งจาน
+  isRequired   Boolean    @default(false)
+  /// โปรตีนหลักของจาน — มีอย่างน้อยหนึ่งตัวได้โบนัสคะแนน
+  isProtein    Boolean    @default(false)
+  /// ลำดับแสดงผลภายในสูตร
+  position     Int        @default(0)
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+
+  @@id([recipeId, ingredientId])
+  @@map("recipe_ingredients")
+}

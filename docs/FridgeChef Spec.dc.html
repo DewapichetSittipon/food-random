@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Prompt:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  @keyframes fc-pop { 0% { transform: scale(.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes fc-slide { 0% { transform: translateX(24px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+</style>
+</helmet>
+<div style="min-height:100vh; background:oklch(0.97 0.008 80); font-family:'IBM Plex Sans Thai',sans-serif; color:oklch(0.24 0.012 60); padding:48px 24px 96px; -webkit-font-smoothing:antialiased;">
+
+  <!-- ========== HEADER ========== -->
+  <header style="max-width:1160px; margin:0 auto 44px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px; height:44px; border-radius:13px; background:oklch(0.62 0.17 35); display:flex; align-items:center; justify-content:center; font-size:24px;">🍳</div>
+      <div>
+        <div style="font-family:'Prompt',sans-serif; font-weight:700; font-size:22px; line-height:1.1; color:oklch(0.24 0.012 60);">FridgeChef</div>
+        <div style="font-size:13px; color:oklch(0.55 0.01 60);">สุ่มเมนูจากวัตถุดิบในตู้เย็น · PWA Offline-First</div>
+      </div>
+    </div>
+    <h1 style="font-family:'Prompt',sans-serif; font-weight:700; font-size:clamp(30px,4vw,46px); line-height:1.12; margin:12px 0 0; max-width:820px; letter-spacing:-0.01em;">System &amp; UX Blueprint<span style="color:oklch(0.62 0.17 35);">.</span></h1>
+    <p style="font-size:16px; line-height:1.65; color:oklch(0.44 0.012 60); max-width:680px; margin:0;">เอกสารสถาปัตยกรรมพร้อม Prototype ทำงานจริง — Database Schema, Matching &amp; Random Algorithm, Mobile-First Wireframe และ Seed Data ทั้งหมดออกแบบให้ทำงานแบบ Offline-First บน IndexedDB</p>
+    <nav style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+      <a href="#proto" style="text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:99px; background:oklch(0.24 0.012 60); color:oklch(0.97 0.008 80);">▶ Live Prototype</a>
+      <a href="#schema" style="text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:99px; background:#fff; color:oklch(0.34 0.012 60); border:1px solid oklch(0.9 0.01 80);">1 · Schema</a>
+      <a href="#algo" style="text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:99px; background:#fff; color:oklch(0.34 0.012 60); border:1px solid oklch(0.9 0.01 80);">2 · Matching Logic</a>
+      <a href="#wire" style="text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:99px; background:#fff; color:oklch(0.34 0.012 60); border:1px solid oklch(0.9 0.01 80);">3 · Wireframe</a>
+      <a href="#seed" style="text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:99px; background:#fff; color:oklch(0.34 0.012 60); border:1px solid oklch(0.9 0.01 80);">4 · Seed Data</a>
+    </nav>
+  </header>
+
+  <!-- ========== LIVE PROTOTYPE ========== -->
+  <section id="proto" style="max-width:1160px; margin:0 auto 64px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:500; color:oklch(0.62 0.17 35); background:oklch(0.94 0.03 40); padding:4px 10px; border-radius:6px;">▶ LIVE</span>
+      <h2 style="font-family:'Prompt',sans-serif; font-weight:600; font-size:22px; margin:0;">Prototype ทำงานจริง</h2>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:40px; align-items:flex-start;">
+      <!-- PHONE -->
+      <div style="flex:0 0 auto; margin:0 auto;">
+        <div style="width:390px; height:800px; background:#0b0b0d; border-radius:52px; padding:13px; box-shadow:0 40px 80px -20px oklch(0.4 0.02 60 / 0.4), 0 0 0 2px oklch(0.85 0.01 80);">
+          <div style="width:100%; height:100%; background:oklch(0.98 0.006 80); border-radius:40px; overflow:hidden; position:relative; display:flex; flex-direction:column;">
+            <!-- notch -->
+            <div style="position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:#0b0b0d; border-radius:99px; z-index:30;"></div>
+
+            <!-- ===== SELECT SCREEN ===== -->
+            <sc-if value="{{ isSelect }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; height:100%;">
+              <div style="padding:52px 22px 14px; background:oklch(0.98 0.006 80);">
+                <div style="font-size:13px; color:oklch(0.58 0.01 60); font-weight:500;">ตู้เย็นของคุณ</div>
+                <div style="font-family:'Prompt',sans-serif; font-weight:600; font-size:24px; line-height:1.2; margin-top:2px;">มีอะไรอยู่บ้าง?</div>
+                <div style="font-size:13px; color:oklch(0.55 0.01 60); margin-top:6px;">เลือก <b style="color:oklch(0.62 0.17 35);">{{ selectedCount }}</b> อย่างแล้ว · เจอ <b style="color:oklch(0.55 0.14 150);">{{ matchCount }}</b> เมนู</div>
+              </div>
+
+              <div style="flex:1; overflow-y:auto; padding:6px 22px 120px;">
+                <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+                  <div style="margin-top:22px;">
+                    <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:oklch(0.5 0.01 60); text-transform:uppercase; margin-bottom:11px;">{{ g.name }}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:9px;">
+                      <sc-for list="{{ g.items }}" as="item" hint-placeholder-count="5">
+                        <button onClick="{{ item.toggle }}" style="{{ item.style }}">
+                          <span style="{{ item.dotStyle }}"></span>{{ item.name }}
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <!-- sticky random button -->
+              <div style="position:absolute; bottom:0; left:0; right:0; padding:16px 22px 26px; background:linear-gradient(to top, oklch(0.98 0.006 80) 60%, transparent);">
+                <button onClick="{{ onRandom }}" style="{{ randomBtnStyle }}">
+                  <span style="font-size:19px;">🎲</span>
+                  <span>{{ randomLabel }}</span>
+                </button>
+              </div>
+            </div>
+            </sc-if>
+
+            <!-- ===== RESULT SCREEN ===== -->
+            <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; height:100%; animation:fc-pop .35s ease;">
+              <!-- hero -->
+              <div style="padding:52px 22px 22px; background:oklch(0.62 0.17 35); color:#fff; position:relative;">
+                <button onClick="{{ onReset }}" style="background:oklch(1 0 0 / 0.16); border:none; color:#fff; font-family:'IBM Plex Sans Thai'; font-size:13px; padding:6px 12px; border-radius:99px; cursor:pointer;">‹ เลือกใหม่</button>
+                <div style="font-size:12px; opacity:0.85; margin-top:16px; font-weight:500;">{{ result.template }}</div>
+                <div style="font-family:'Prompt',sans-serif; font-weight:700; font-size:30px; line-height:1.15; margin-top:2px;">{{ result.name }}</div>
+                <div style="display:flex; gap:16px; margin-top:14px; font-size:13px; opacity:0.92;">
+                  <span>⏱ {{ result.cookTime }} นาที</span>
+                  <span>🔥 {{ result.difficultyLabel }}</span>
+                  <span>👤 {{ result.servings }} ที่</span>
+                </div>
+              </div>
+
+              <div style="flex:1; overflow-y:auto; padding:20px 22px 30px;">
+                <!-- match status -->
+                <div style="{{ result.statusStyle }}">
+                  <div style="font-weight:600; font-size:14px;">{{ result.statusTitle }}</div>
+                  <sc-if value="{{ result.hasMissing }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:9px;">
+                      <sc-for list="{{ result.missing }}" as="m" hint-placeholder-count="2">
+                        <span style="font-size:12px; background:#fff; border:1px dashed oklch(0.72 0.14 55); color:oklch(0.5 0.14 45); padding:4px 10px; border-radius:99px;">+ {{ m }}</span>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+
+                <!-- seasonings -->
+                <div style="margin-top:26px;">
+                  <div style="font-family:'Prompt',sans-serif; font-weight:600; font-size:16px; margin-bottom:12px;">เครื่องปรุงที่ต้องใช้</div>
+                  <div style="display:flex; flex-direction:column; gap:1px; background:oklch(0.92 0.008 80); border-radius:14px; overflow:hidden;">
+                    <sc-for list="{{ result.seasonings }}" as="s" hint-placeholder-count="4">
+                      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:#fff;">
+                        <span style="font-size:14px;">{{ s.name }}</span>
+                        <span style="font-size:13px; color:oklch(0.55 0.01 60); font-family:'IBM Plex Mono',monospace;">{{ s.amount }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <!-- steps -->
+                <div style="margin-top:26px;">
+                  <div style="font-family:'Prompt',sans-serif; font-weight:600; font-size:16px; margin-bottom:14px;">วิธีทำ</div>
+                  <div style="display:flex; flex-direction:column; gap:16px;">
+                    <sc-for list="{{ result.steps }}" as="step" hint-placeholder-count="4">
+                      <div style="display:flex; gap:13px; align-items:flex-start;">
+                        <div style="flex:0 0 auto; width:26px; height:26px; border-radius:99px; background:oklch(0.94 0.03 40); color:oklch(0.55 0.15 40); font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; margin-top:1px;">{{ step.n }}</div>
+                        <div style="font-size:14px; line-height:1.6; color:oklch(0.3 0.012 60);">{{ step.text }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <!-- alternatives -->
+                <sc-if value="{{ hasCandidates }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:30px; padding-top:22px; border-top:1px solid oklch(0.92 0.008 80);">
+                  <div style="font-size:13px; font-weight:600; color:oklch(0.5 0.01 60); margin-bottom:11px;">🔀 ตัวเลือกสำรอง (แตะเพื่อสลับ)</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <sc-for list="{{ candidates }}" as="c" hint-placeholder-count="3">
+                      <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.name }} · {{ c.scoreLabel }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                </sc-if>
+              </div>
+
+              <div style="padding:14px 22px 26px; background:oklch(0.98 0.006 80); border-top:1px solid oklch(0.93 0.008 80);">
+                <button onClick="{{ onRandom }}" style="width:100%; border:none; background:oklch(0.24 0.012 60); color:#fff; font-family:'Prompt',sans-serif; font-weight:600; font-size:16px; padding:15px; border-radius:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">🎲 สุ่มเมนูใหม่</button>
+              </div>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDE NOTES -->
+      <div style="flex:1; min-width:280px; max-width:420px; display:flex; flex-direction:column; gap:16px; padding-top:8px;">
+        <div style="background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:18px; padding:20px;">
+          <div style="font-family:'Prompt',sans-serif; font-weight:600; font-size:16px;">ลองเล่นดูได้เลย</div>
+          <p style="font-size:14px; line-height:1.65; color:oklch(0.45 0.012 60); margin:8px 0 0;">ติ๊กวัตถุดิบ เช่น <b>ไก่ · ใบกะเพรา · พริก · กระเทียม</b> แล้วกดสุ่ม — ระบบจะให้ "ผัดกะเพราไก่" คะแนนสูงสุด และเก็บ "ไก่ผัดกระเทียม" ไว้เป็นตัวเลือกสำรองในการสุ่ม</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:14px; padding:15px;">
+            <span style="font-size:20px;">📴</span>
+            <div><div style="font-weight:600; font-size:14px;">Offline-First</div><div style="font-size:13px; color:oklch(0.5 0.012 60); line-height:1.55;">โหลดเมนูทั้งหมดลง IndexedDB (Dexie.js) ครั้งเดียว — Matching &amp; Random รันในเครื่อง ไม่ต้องต่อเน็ต</div></div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:14px; padding:15px;">
+            <span style="font-size:20px;">🧩</span>
+            <div><div style="font-weight:600; font-size:14px;">Template-based</div><div style="font-size:13px; color:oklch(0.5 0.012 60); line-height:1.55;">เมนูใช้แม่แบบร่วมกัน (กะเพรา, ข้าวผัด, ผัดกระเทียม) แตกแขนงตามเนื้อสัตว์ — สร้างเมนูใหม่ได้เร็ว</div></div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:flex-start; background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:14px; padding:15px;">
+            <span style="font-size:20px;">☁️</span>
+            <div><div style="font-weight:600; font-size:14px;">Supabase Sync</div><div style="font-size:13px; color:oklch(0.5 0.012 60); line-height:1.55;">อัปเดตสูตรใหม่หลังบ้าน แล้ว sync ลงเครื่องผู้ใช้เมื่อออนไลน์ ผ่าน field <code style="font-family:'IBM Plex Mono';font-size:12px;">updatedAt</code></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 1. SCHEMA ========== -->
+  <section id="schema" style="max-width:1160px; margin:0 auto 64px;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <span style="font-family:'IBM Plex Mono'; font-weight:500; font-size:14px; color:oklch(0.62 0.17 35);">01</span>
+      <h2 style="font-family:'Prompt',sans-serif; font-weight:600; font-size:24px; margin:0;">Database Schema</h2>
+    </div>
+    <p style="font-size:15px; line-height:1.65; color:oklch(0.45 0.012 60); max-width:720px; margin:0 0 22px;">โครงสร้างของ <b>1 เอกสารเมนู</b> ออกแบบให้ Matching Logic ทำงานได้เร็ว — จุดสำคัญคือแยก <code style="font-family:'IBM Plex Mono';font-size:13px; background:oklch(0.94 0.008 80); padding:1px 5px; border-radius:4px;">coreIngredients</code> (ใช้คิดคะแนน) ออกจาก <code style="font-family:'IBM Plex Mono';font-size:13px; background:oklch(0.94 0.008 80); padding:1px 5px; border-radius:4px;">seasonings</code> (เครื่องปรุงที่ครัวมีอยู่แล้ว ไม่นำมาคิด)</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start;">
+      <pre style="{{ preStyle }}">{{ schemaCode }}</pre>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ schemaFields }}" as="f" hint-placeholder-count="6">
+          <div style="background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:12px; padding:13px 15px;">
+            <code style="font-family:'IBM Plex Mono'; font-weight:500; font-size:13px; color:oklch(0.5 0.16 260);">{{ f.key }}</code>
+            <span style="font-family:'IBM Plex Mono'; font-size:12px; color:oklch(0.6 0.01 60); margin-left:8px;">{{ f.type }}</span>
+            <div style="font-size:13px; color:oklch(0.4 0.012 60); line-height:1.55; margin-top:5px;">{{ f.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 2. ALGORITHM ========== -->
+  <section id="algo" style="max-width:1160px; margin:0 auto 64px;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <span style="font-family:'IBM Plex Mono'; font-weight:500; font-size:14px; color:oklch(0.62 0.17 35);">02</span>
+      <h2 style="font-family:'Prompt',sans-serif; font-weight:600; font-size:24px; margin:0;">Matching &amp; Weighted Random</h2>
+    </div>
+    <p style="font-size:15px; line-height:1.65; color:oklch(0.45 0.012 60); max-width:720px; margin:0 0 22px;">3 ขั้นตอน: <b>Filter</b> (ตัดเมนูที่ขาดวัตถุดิบบังคับ) → <b>Score</b> (คิดคะแนนความเข้ากัน) → <b>Weighted Random</b> (สุ่มโดยเมนูคะแนนสูงมีโอกาสถูกเลือกมากกว่า แต่เมนูรองก็ยังมีลุ้น)</p>
+
+    <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:20px; align-items:start;">
+      <pre style="{{ preStyle }}">{{ algoCode }}</pre>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <sc-for list="{{ algoSteps }}" as="a" hint-placeholder-count="3">
+          <div style="background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:14px; padding:16px;">
+            <div style="display:flex; align-items:center; gap:9px; margin-bottom:7px;">
+              <span style="width:24px; height:24px; border-radius:7px; background:oklch(0.94 0.03 40); color:oklch(0.55 0.15 40); font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono';">{{ a.n }}</span>
+              <span style="font-weight:600; font-size:15px; font-family:'Prompt',sans-serif;">{{ a.title }}</span>
+            </div>
+            <div style="font-size:13px; line-height:1.6; color:oklch(0.42 0.012 60);">{{ a.desc }}</div>
+          </div>
+        </sc-for>
+        <div style="background:oklch(0.96 0.02 150); border:1px solid oklch(0.85 0.05 150); border-radius:14px; padding:16px;">
+          <div style="font-weight:600; font-size:14px; font-family:'Prompt',sans-serif; color:oklch(0.4 0.1 150);">ทำไมต้อง Weighted Random?</div>
+          <div style="font-size:13px; line-height:1.6; color:oklch(0.4 0.03 150); margin-top:6px;">ถ้าเลือกเมนูคะแนนสูงสุดตายตัว ผู้ใช้จะได้เมนูเดิมซ้ำๆ ทุกวัน — การถ่วงน้ำหนัก (score²) ทำให้เมนูอันดับต้นๆ ยังได้บ่อย แต่มีความประหลาดใจพอให้กลับมาเปิดแอปทุกวัน</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3. WIREFRAME ========== -->
+  <section id="wire" style="max-width:1160px; margin:0 auto 64px;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <span style="font-family:'IBM Plex Mono'; font-weight:500; font-size:14px; color:oklch(0.62 0.17 35);">03</span>
+      <h2 style="font-family:'Prompt',sans-serif; font-weight:600; font-size:24px; margin:0;">Mobile-First Wireframe</h2>
+    </div>
+    <p style="font-size:15px; line-height:1.65; color:oklch(0.45 0.012 60); max-width:720px; margin:0 0 22px;">หลักการ: <b>ปุ่มสุ่มต้องอยู่ในระยะนิ้วโป้งเสมอ (thumb zone)</b> · เนื้อหายาวเลื่อนได้ · ทุกอย่างจบใน 2 หน้าจอ ลดภาระ cognitive load ตอนหิว</p>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:20px;">
+      <sc-for list="{{ wireframes }}" as="w" hint-placeholder-count="2">
+        <div style="background:#fff; border:1px solid oklch(0.92 0.01 80); border-radius:18px; padding:22px; display:flex; gap:20px;">
+          <div style="flex:0 0 auto; width:130px; height:270px; border:2px solid oklch(0.85 0.01 80); border-radius:20px; background:oklch(0.985 0.006 80); padding:10px; display:flex; flex-direction:column; gap:6px;">
+            <sc-for list="{{ w.blocks }}" as="b" hint-placeholder-count="4">
+              <div style="{{ b.style }}">{{ b.label }}</div>
+            </sc-for>
+          </div>
+          <div style="flex:1;">
+            <div style="font-family:'Prompt',sans-serif; font-weight:600; font-size:17px;">{{ w.title }}</div>
+            <div style="font-size:13px; color:oklch(0.55 0.01 60); margin-top:2px; margin-bottom:12px;">{{ w.sub }}</div>
+            <div style="display:flex; flex-direction:column; gap:9px;">
+              <sc-for list="{{ w.notes }}" as="note" hint-placeholder-count="3">
+                <div style="display:flex; gap:8px; font-size:13px; line-height:1.5; color:oklch(0.4 0.012 60);"><span style="color:oklch(0.62 0.17 35); font-weight:700;">›</span><span>{{ note }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- ========== 4. SEED DATA ========== -->
+  <section id="seed" style="max-width:1160px; margin:0 auto 0;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+      <span style="font-family:'IBM Plex Mono'; font-weight:500; font-size:14px; color:oklch(0.62 0.17 35);">04</span>
+      <h2 style="font-family:'Prompt',sans-serif; font-weight:600; font-size:24px; margin:0;">Seed Data — 10 เมนูไทยยอดฮิต</h2>
+    </div>
+    <p style="font-size:15px; line-height:1.65; color:oklch(0.45 0.012 60); max-width:720px; margin:0 0 22px;">ข้อมูลชุดนี้ใช้ขับ Prototype ด้านบนแบบสดๆ — ก็อปไปใส่ <code style="font-family:'IBM Plex Mono';font-size:13px; background:oklch(0.94 0.008 80); padding:1px 5px; border-radius:4px;">db.menus.bulkAdd()</code> ของ Dexie แล้วทดสอบได้ทันที</p>
+    <div style="display:flex; flex-wrap:wrap; gap:9px; margin-bottom:18px;">
+      <sc-for list="{{ menuChips }}" as="m" hint-placeholder-count="10">
+        <span style="font-size:13px; font-weight:500; background:#fff; border:1px solid oklch(0.9 0.01 80); padding:7px 13px; border-radius:99px;">{{ m.emoji }} {{ m.name }}</span>
+      </sc-for>
+    </div>
+    <pre style="{{ preStyleTall }}">{{ seedCode }}</pre>
+  </section>
+
+  <footer style="max-width:1160px; margin:56px auto 0; padding-top:24px; border-top:1px solid oklch(0.9 0.01 80); font-size:13px; color:oklch(0.55 0.01 60); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <span>FridgeChef · System &amp; UX Blueprint</span>
+    <span style="font-family:'IBM Plex Mono';">Offline-First PWA · IndexedDB + Supabase</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  menus = [
+    { id:"pad-kra-pao-gai", name:"ผัดกะเพราไก่", template:"แม่แบบ · ผัดกะเพรา", category:"อาหารตามสั่ง", difficulty:1, cookTime:10, servings:1, protein:["ไก่"],
+      coreIngredients:["ไก่","ใบกะเพรา","พริก","กระเทียม"], requiredTags:["ใบกะเพรา"],
+      seasonings:[{name:"น้ำมันหอย",amount:"1 ชต."},{name:"ซอสปรุงรส",amount:"1 ชช."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["โขลกกระเทียมกับพริกให้แหลก ตั้งกระทะใส่น้ำมันจนร้อน ผัดจนหอม","ใส่ไก่สับลงผัดจนสุก ยกไฟแรงตลอด","ปรุงด้วยน้ำมันหอย ซอสปรุงรส น้ำปลา น้ำตาล ผัดให้เข้ากัน","ใส่ใบกะเพรา ผัดเร็วๆ ให้ใบสลด ปิดไฟ ตักราดข้าว โปะไข่ดาว"], tags:["เผ็ด","จานด่วน"] },
+    { id:"pad-kra-pao-moo", name:"ผัดกะเพราหมูสับ", template:"แม่แบบ · ผัดกะเพรา", category:"อาหารตามสั่ง", difficulty:1, cookTime:10, servings:1, protein:["หมูสับ"],
+      coreIngredients:["หมูสับ","ใบกะเพรา","พริก","กระเทียม"], requiredTags:["ใบกะเพรา"],
+      seasonings:[{name:"น้ำมันหอย",amount:"1 ชต."},{name:"ซีอิ๊วขาว",amount:"1 ชช."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["โขลกกระเทียมพริกให้แหลก ผัดกับน้ำมันจนหอม","ใส่หมูสับ ผัดจนสุกด้วยไฟแรง","ปรุงรสด้วยน้ำมันหอย ซีอิ๊ว น้ำปลา น้ำตาล","ใส่ใบกะเพรา ผัดให้สลด ตักเสิร์ฟพร้อมข้าวสวย"], tags:["เผ็ด","จานด่วน"] },
+    { id:"khao-pad-moo", name:"ข้าวผัดหมู", template:"แม่แบบ · ข้าวผัด", category:"อาหารจานเดียว", difficulty:1, cookTime:12, servings:1, protein:["หมู"],
+      coreIngredients:["ข้าวสวย","หมู","ไข่","กระเทียม","ต้นหอม"], requiredTags:["ข้าวสวย"],
+      seasonings:[{name:"ซีอิ๊วขาว",amount:"1 ชต."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"พริกไทย",amount:"เล็กน้อย"},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["เจียวกระเทียมกับน้ำมันจนหอม ใส่หมูผัดจนสุก","ตอกไข่ลงคนให้สุก แล้วใส่ข้าวสวยลงผัด","ปรุงด้วยซีอิ๊ว น้ำปลา น้ำตาล ผัดให้ข้าวร่วน","ใส่ต้นหอมซอย คลุกเบาๆ ตักเสิร์ฟกับมะนาวและแตงกวา"], tags:["ไม่เผ็ด","อิ่มง่าย"] },
+    { id:"khao-pad-goong", name:"ข้าวผัดกุ้ง", template:"แม่แบบ · ข้าวผัด", category:"อาหารจานเดียว", difficulty:2, cookTime:12, servings:1, protein:["กุ้ง"],
+      coreIngredients:["ข้าวสวย","กุ้ง","ไข่","กระเทียม","ต้นหอม"], requiredTags:["ข้าวสวย"],
+      seasonings:[{name:"ซีอิ๊วขาว",amount:"1 ชต."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"พริกไทย",amount:"เล็กน้อย"},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["เจียวกระเทียมจนหอม ใส่กุ้งผัดพอเปลี่ยนสี ตักพักไว้","ตอกไข่ลงผัด ใส่ข้าวสวยผัดให้ร่วน","ปรุงรส ใส่กุ้งกลับลงไป ผัดรวมกัน","โรยต้นหอม ตักเสิร์ฟพร้อมมะนาว"], tags:["ไม่เผ็ด"] },
+    { id:"gai-pad-kratiam", name:"ไก่ผัดกระเทียมพริกไทย", template:"แม่แบบ · ผัดกระเทียม", category:"อาหารตามสั่ง", difficulty:1, cookTime:10, servings:1, protein:["ไก่"],
+      coreIngredients:["ไก่","กระเทียม"], requiredTags:["กระเทียม"],
+      seasonings:[{name:"ซีอิ๊วขาว",amount:"1 ชต."},{name:"น้ำมันหอย",amount:"1 ชช."},{name:"พริกไทย",amount:"1/2 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["สับกระเทียมให้ละเอียด หมักไก่กับกระเทียม ซีอิ๊ว พริกไทย 5 นาที","ตั้งกระทะใส่น้ำมัน ผัดไก่ที่หมักจนสุกและหอมกระเทียม","ปรุงด้วยน้ำมันหอย น้ำตาล ผัดให้เคลือบทั่ว","ตักราดข้าว โรยกระเทียมเจียว เสิร์ฟกับแตงกวา"], tags:["ไม่เผ็ด","เด็กกินได้"] },
+    { id:"moo-pad-kratiam", name:"หมูผัดกระเทียม", template:"แม่แบบ · ผัดกระเทียม", category:"อาหารตามสั่ง", difficulty:1, cookTime:10, servings:1, protein:["หมู"],
+      coreIngredients:["หมู","กระเทียม"], requiredTags:["กระเทียม"],
+      seasonings:[{name:"ซีอิ๊วขาว",amount:"1 ชต."},{name:"น้ำมันหอย",amount:"1 ชช."},{name:"พริกไทย",amount:"1/2 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["หมักหมูกับกระเทียมสับ ซีอิ๊ว พริกไทย 5 นาที","ผัดกับน้ำมันร้อนจนสุกและหอม","ปรุงด้วยน้ำมันหอย น้ำตาล ผัดให้เข้ากัน","ตักราดข้าว โรยพริกไทย เสิร์ฟ"], tags:["ไม่เผ็ด","เด็กกินได้"] },
+    { id:"pad-pak-boong", name:"ผัดผักบุ้งไฟแดง", template:"แม่แบบ · ผัดผัก", category:"อาหารตามสั่ง", difficulty:1, cookTime:6, servings:1, protein:[],
+      coreIngredients:["ผักบุ้ง","กระเทียม","พริก"], requiredTags:["ผักบุ้ง"],
+      seasonings:[{name:"เต้าเจี้ยว",amount:"1 ชต."},{name:"น้ำมันหอย",amount:"1 ชต."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลทราย",amount:"1/2 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["โขลกกระเทียมกับพริก ตั้งกระทะให้ร้อนจัด","ใส่กระเทียมพริกลงผัดให้หอม ใส่ผักบุ้ง","ปรุงด้วยเต้าเจี้ยว น้ำมันหอย น้ำปลา น้ำตาล ผัดเร็วๆ ด้วยไฟแรง","ผัดแค่พอผักสลด ยังเขียวกรอบ ตักเสิร์ฟทันที"], tags:["มังสวิรัติได้","เผ็ดน้อย"] },
+    { id:"khai-jiao", name:"ไข่เจียวหมูสับ", template:"แม่แบบ · ไข่", category:"อาหารจานเดียว", difficulty:1, cookTime:5, servings:1, protein:["ไข่","หมูสับ"],
+      coreIngredients:["ไข่","หมูสับ"], requiredTags:["ไข่"],
+      seasonings:[{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำมันพืช",amount:"3 ชต."}],
+      steps:["ตอกไข่ใส่ชาม ใส่หมูสับ ปรุงน้ำปลา ตีให้ขึ้นฟู","ตั้งน้ำมันให้ร้อนจัด เทไข่ลงกลางกระทะ","พอขอบฟูกรอบ พลิกกลับด้าน ทอดให้เหลืองทั้งสองด้าน","ตักขึ้นสะเด็ดน้ำมัน ราดข้าวสวยร้อนๆ"], tags:["ไม่เผ็ด","เด็กกินได้","ทำง่าย"] },
+    { id:"tom-yum-goong", name:"ต้มยำกุ้งน้ำใส", template:"แม่แบบ · ต้ม", category:"ต้ม/แกง", difficulty:2, cookTime:15, servings:2, protein:["กุ้ง"],
+      coreIngredients:["กุ้ง","ตะไคร้","ข่า","ใบมะกรูด","พริก","เห็ด","มะเขือเทศ"], requiredTags:["กุ้ง"],
+      seasonings:[{name:"น้ำพริกเผา",amount:"1 ชต."},{name:"น้ำปลา",amount:"2 ชต."},{name:"น้ำมะนาว",amount:"3 ชต."},{name:"น้ำตาลทราย",amount:"1 ชช."}],
+      steps:["ต้มน้ำ ใส่ตะไคร้ทุบ ข่า ใบมะกรูดฉีก ต้มให้หอม","ใส่เห็ดและมะเขือเทศ ต้มให้เดือด","ใส่กุ้งและพริกทุบ ต้มจนกุ้งสุก ปิดไฟ","ปรุงด้วยน้ำปลา น้ำตาล น้ำพริกเผา บีบมะนาว ชิมให้เปรี้ยวนำ"], tags:["เผ็ด","เปรี้ยว"] },
+    { id:"pad-prik-gaeng-moo", name:"หมูผัดพริกแกง", template:"แม่แบบ · ผัดพริกแกง", category:"อาหารตามสั่ง", difficulty:2, cookTime:12, servings:1, protein:["หมู"],
+      coreIngredients:["หมู","พริกแกง","ถั่วฝักยาว","ใบมะกรูด"], requiredTags:["พริกแกง"],
+      seasonings:[{name:"น้ำมันหอย",amount:"1 ชต."},{name:"น้ำปลา",amount:"1 ชช."},{name:"น้ำตาลปี๊บ",amount:"1 ชช."},{name:"น้ำมันพืช",amount:"2 ชต."}],
+      steps:["ตั้งน้ำมัน ผัดพริกแกงเผ็ดจนหอมและแตกมัน","ใส่หมูลงผัดจนสุก","ใส่ถั่วฝักยาวหั่นท่อน ผัดพอสุก ปรุงด้วยน้ำมันหอย น้ำปลา น้ำตาล","ใส่ใบมะกรูดฉีก ผัดให้หอม ตักราดข้าว"], tags:["เผ็ด","เผ็ดมาก"] },
+  ];
+
+  ingredientGroups = [
+    { name:"โปรตีน", items:["ไก่","หมู","หมูสับ","กุ้ง","ไข่"] },
+    { name:"ผักและสมุนไพร", items:["ใบกะเพรา","กระเทียม","พริก","ผักบุ้ง","ต้นหอม","ถั่วฝักยาว","มะเขือเทศ","ตะไคร้","ข่า","ใบมะกรูด","เห็ด","พริกแกง"] },
+    { name:"คาร์โบไฮเดรต", items:["ข้าวสวย"] },
+  ];
+
+  state = { screen:"select", selected:["ไก่","ใบกะเพรา","พริก","กระเทียม"], result:null, candidates:[] };
+
+  toggle(name){
+    this.setState(s=>{
+      const has = s.selected.includes(name);
+      return { selected: has ? s.selected.filter(x=>x!==name) : [...s.selected, name] };
+    });
+  }
+
+  // ---- scoring core ----
+  scoreMenu(menu, selectedSet){
+    for(const r of menu.requiredTags){ if(!selectedSet.has(r)) return null; }
+    const core = menu.coreIngredients;
+    const have = core.filter(i=>selectedSet.has(i));
+    const missing = core.filter(i=>!selectedSet.has(i));
+    const coverage = have.length / core.length;
+    const proteinMatch = menu.protein.length===0 || menu.protein.some(p=>selectedSet.has(p)) ? 1 : 0;
+    const score = Math.round(coverage*100 + proteinMatch*10 - missing.length*4);
+    return { menu, score, coverage, missing, have };
+  }
+
+  getCandidates(){
+    const set = new Set(this.state.selected);
+    return this.menus
+      .map(m=>this.scoreMenu(m,set))
+      .filter(r=>r && r.coverage>=0.5)
+      .sort((a,b)=>b.score-a.score)
+      .slice(0,6);
+  }
+
+  weightedPick(cands){
+    const weights = cands.map(c=>Math.pow(c.score,2));
+    const total = weights.reduce((a,b)=>a+b,0);
+    let r = Math.random()*total;
+    for(let i=0;i<cands.length;i++){ r-=weights[i]; if(r<=0) return cands[i]; }
+    return cands[0];
+  }
+
+  onRandom(){
+    const cands = this.getCandidates();
+    if(cands.length===0) return;
+    const picked = this.weightedPick(cands);
+    this.setState({ screen:"result", result:picked, candidates:cands });
+  }
+
+  diffLabel(d){ return d===1?"ง่ายมาก":d===2?"ปานกลาง":"ท้าทาย"; }
+
+  renderVals(){
+    const set = new Set(this.state.selected);
+    const cands = this.getCandidates();
+
+    const groups = this.ingredientGroups.map(g=>({
+      name:g.name,
+      items:g.items.map(n=>{
+        const sel = set.has(n);
+        return {
+          name:n,
+          toggle:()=>this.toggle(n),
+          style:`display:inline-flex;align-items:center;gap:7px;font-family:'IBM Plex Sans Thai';font-size:14px;font-weight:500;padding:9px 14px;border-radius:99px;cursor:pointer;transition:all .15s;border:1.5px solid ${sel?'oklch(0.62 0.17 35)':'oklch(0.9 0.01 80)'};background:${sel?'oklch(0.62 0.17 35)':'#fff'};color:${sel?'#fff':'oklch(0.35 0.012 60)'};`,
+          dotStyle:`width:7px;height:7px;border-radius:99px;background:${sel?'#fff':'oklch(0.85 0.01 80)'};`
+        };
+      })
+    }));
+
+    const r = this.state.result;
+    let result = null;
+    if(r){
+      const m = r.menu;
+      const hasMissing = r.missing.length>0;
+      result = {
+        name:m.name, template:m.template, cookTime:m.cookTime, servings:m.servings,
+        difficultyLabel:this.diffLabel(m.difficulty),
+        seasonings:m.seasonings,
+        steps:m.steps.map((t,i)=>({n:i+1,text:t})),
+        missing:r.missing, hasMissing,
+        statusTitle: hasMissing ? `มีวัตถุดิบหลัก ${r.have.length}/${m.coreIngredients.length} — ขาดอีกนิดหน่อย` : "✓ คุณมีวัตถุดิบหลักครบทุกอย่าง!",
+        statusStyle: hasMissing
+          ? "background:oklch(0.97 0.03 70);border:1px solid oklch(0.88 0.06 70);border-radius:14px;padding:14px 16px;"
+          : "background:oklch(0.96 0.03 150);border:1px solid oklch(0.85 0.06 150);border-radius:14px;padding:14px 16px;color:oklch(0.4 0.1 150);"
+      };
+    }
+
+    const candidates = cands.map(c=>{
+      const active = r && c.menu.id===r.menu.id;
+      return {
+        name:c.menu.name,
+        scoreLabel:`${c.score}`,
+        pick:()=>this.setState({result:c}),
+        style:`font-family:'IBM Plex Sans Thai';font-size:12.5px;font-weight:500;padding:8px 13px;border-radius:99px;cursor:pointer;border:1.5px solid ${active?'oklch(0.62 0.17 35)':'oklch(0.9 0.01 80)'};background:${active?'oklch(0.94 0.03 40)':'#fff'};color:${active?'oklch(0.5 0.15 40)':'oklch(0.4 0.012 60)'};`
+      };
+    });
+
+    const preStyle = "font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.7;background:oklch(0.22 0.012 60);color:oklch(0.9 0.01 80);padding:20px;border-radius:16px;overflow-x:auto;margin:0;white-space:pre;";
+    const preStyleTall = preStyle + "max-height:560px;overflow-y:auto;";
+
+    const schemaCode =
+`{
+  "id": "pad-kra-pao-gai",
+  "name": "ผัดกะเพราไก่",
+  "template": "pad-kra-pao",     // แม่แบบร่วม
+  "category": "อาหารตามสั่ง",
+  "difficulty": 1,               // 1-3
+  "cookTime": 10,                // นาที
+  "servings": 1,
+  "protein": ["ไก่"],
+  "coreIngredients": [           // ★ ใช้คิดคะแนน
+    "ไก่", "ใบกะเพรา",
+    "พริก", "กระเทียม"
+  ],
+  "requiredTags": ["ใบกะเพรา"],  // ขาดไม่ได้
+  "seasonings": [                // เครื่องปรุง (ไม่คิดคะแนน)
+    { "name": "น้ำมันหอย", "amount": "1 ชต." },
+    { "name": "น้ำปลา",    "amount": "1 ชช." }
+  ],
+  "steps": [
+    "โขลกกระเทียมพริก ผัดจนหอม",
+    "ใส่ไก่ผัดจนสุก",
+    "ปรุงรส ใส่ใบกะเพรา ปิดไฟ"
+  ],
+  "tags": ["เผ็ด", "จานด่วน"],
+  "updatedAt": "2026-07-03T00:00:00Z"  // สำหรับ sync
+}`;
+
+    const algoCode =
+`// 1) FILTER + SCORE
+function scoreMenu(menu, selectedSet) {
+  // ตัดทิ้งถ้าขาดวัตถุดิบบังคับ
+  for (const r of menu.requiredTags)
+    if (!selectedSet.has(r)) return null;
+
+  const core = menu.coreIngredients;
+  const have    = core.filter(i => selectedSet.has(i));
+  const missing = core.filter(i => !selectedSet.has(i));
+  const coverage = have.length / core.length;   // 0..1
+
+  const proteinOK = menu.protein.length === 0 ||
+    menu.protein.some(p => selectedSet.has(p)) ? 1 : 0;
+
+  // ครบมาก = คะแนนสูง, ขาดมาก = โดนหัก
+  const score = Math.round(
+    coverage * 100 + proteinOK * 10 - missing.length * 4
+  );
+  return { menu, score, coverage, missing, have };
+}
+
+// 2) หา candidates (เก็บเมนูรองไว้ด้วย)
+const set = new Set(userIngredients);
+const candidates = menus
+  .map(m => scoreMenu(m, set))
+  .filter(r => r && r.coverage >= 0.5)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 6);
+
+// 3) WEIGHTED RANDOM — คะแนนสูง = โอกาสมากกว่า
+function weightedPick(cands) {
+  const w = cands.map(c => c.score ** 2);
+  const total = w.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < cands.length; i++) {
+    r -= w[i];
+    if (r <= 0) return cands[i];
+  }
+  return cands[0];
+}
+
+const dish = weightedPick(candidates);`;
+
+    const schemaFields = [
+      {key:"coreIngredients", type:"string[]", desc:"วัตถุดิบหลักที่ใช้คำนวณ Match Score — coverage = จำนวนที่ผู้ใช้มี ÷ จำนวนทั้งหมด"},
+      {key:"requiredTags", type:"string[]", desc:"วัตถุดิบที่ 'ขาดไม่ได้' ถ้าไม่มี เมนูนี้จะถูกกรองทิ้งทันที (เช่น ใบกะเพราของผัดกะเพรา)"},
+      {key:"protein", type:"string[]", desc:"เนื้อสัตว์หลัก ใช้ให้คะแนนโบนัส และช่วยแตกแขนงเมนูจาก template เดียวกัน"},
+      {key:"seasonings", type:"{name,amount}[]", desc:"เครื่องปรุงที่ครัวมักมีอยู่แล้ว — แสดงในหน้าวิธีทำ แต่ไม่นำมาคิดคะแนน"},
+      {key:"template", type:"string", desc:"แม่แบบร่วม สร้างเมนูใหม่ได้เร็วโดยเปลี่ยนแค่ protein/ผัก"},
+      {key:"updatedAt", type:"ISO string", desc:"Timestamp สำหรับ Supabase sync — ดึงเฉพาะเมนูที่ใหม่กว่าลง IndexedDB"},
+    ];
+
+    const algoSteps = [
+      {n:"1", title:"Filter", desc:"ตัดเมนูที่ขาด requiredTags ออกก่อน (return null) — ผัดกะเพราต้องมีใบกะเพราเท่านั้น"},
+      {n:"2", title:"Score", desc:"คิด coverage + โบนัสโปรตีน − ค่าปรับตามวัตถุดิบที่ขาด แล้วเก็บ Top 6 เป็น candidates"},
+      {n:"3", title:"Weighted Random", desc:"สุ่มด้วยน้ำหนัก score² — เมนูคะแนนสูงถูกเลือกบ่อยกว่า แต่เมนูรองยังมีลุ้น ไม่จำเจ"},
+    ];
+
+    const wireBlock = (label, h, fill, txt) => ({label, style:`height:${h}px;border-radius:6px;background:${fill};display:flex;align-items:center;justify-content:center;font-size:8px;color:${txt||'oklch(0.5 0.01 60)'};font-family:'IBM Plex Sans Thai';text-align:center;padding:2px;`});
+    const wireframes = [
+      { title:"หน้าที่ 1 · เลือกวัตถุดิบ", sub:"Selection Screen",
+        blocks:[ wireBlock("Header + ตัวนับ",26,"oklch(0.94 0.008 80)"), wireBlock("Chips วัตถุดิบ (เลื่อนได้)",120,"oklch(0.965 0.006 80)"), wireBlock("🎲 ปุ่มสุ่ม",34,"oklch(0.62 0.17 35)","#fff") ],
+        notes:["Chips จัดกลุ่มตามหมวด (โปรตีน / ผัก / คาร์บ) แตะติ๊กได้ทันที ไม่ต้องพิมพ์","ตัวนับสด: เลือกกี่อย่าง เจอกี่เมนู — ให้ feedback ทันที","ปุ่มสุ่มปักหมุดล่างจอเสมอ (thumb zone) แตะได้ด้วยนิ้วโป้งมือเดียว","Hit target ≥ 44px ทุกปุ่ม"] },
+      { title:"หน้าที่ 2 · ผลลัพธ์ + วิธีทำ", sub:"Result Screen",
+        blocks:[ wireBlock("Hero ชื่อเมนู + เวลา",44,"oklch(0.62 0.17 35)","#fff"), wireBlock("สถานะวัตถุดิบ",22,"oklch(0.96 0.03 150)"), wireBlock("เครื่องปรุง + วิธีทำ (เลื่อน)",108,"oklch(0.965 0.006 80)"), wireBlock("สุ่มใหม่",26,"oklch(0.24 0.012 60)","#fff") ],
+        notes:["Hero สีเด่นบอกชื่อเมนูชัด เห็นแล้วรู้ทันทีว่าได้อะไร","บอกว่ามีครบไหม ถ้าขาดโชว์เป็น chip 'ต้องซื้อเพิ่ม'","ขั้นตอนเป็นข้อๆ มีเลขกำกับ อ่านง่ายระหว่างทำครัว","แถบ 'ตัวเลือกสำรอง' สลับเมนูได้โดยไม่ต้องสุ่มใหม่ + ปุ่มสุ่มใหม่ค้างล่าง"] },
+    ];
+
+    const menuChips = this.menus.map(m=>{
+      const e = m.category==="ต้ม/แกง"?"🍲":m.template.includes("ข้าวผัด")?"🍚":m.template.includes("ไข่")?"🍳":m.template.includes("ผัดผัก")?"🥬":"🍛";
+      return {emoji:e, name:m.name};
+    });
+
+    const seedCode = "[\n" + this.menus.map(m=>"  "+JSON.stringify(m)).join(",\n") + "\n]";
+
+    return {
+      isSelect: this.state.screen==="select",
+      isResult: this.state.screen==="result",
+      selectedCount: this.state.selected.length,
+      matchCount: cands.length,
+      groups,
+      onRandom: ()=>this.onRandom(),
+      onReset: ()=>this.setState({screen:"select"}),
+      randomLabel: cands.length>0 ? `สุ่มเมนู (${cands.length} ตัวเลือก)` : "เลือกวัตถุดิบก่อน",
+      randomBtnStyle: `width:100%;border:none;font-family:'Prompt',sans-serif;font-weight:600;font-size:17px;padding:16px;border-radius:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;color:#fff;background:${cands.length>0?'oklch(0.62 0.17 35)':'oklch(0.75 0.02 60)'};box-shadow:0 8px 20px -6px oklch(0.62 0.17 35 / 0.5);`,
+      result,
+      candidates, hasCandidates: candidates.length>1,
+      preStyle, preStyleTall, schemaCode, algoCode, seedCode,
+      schemaFields, algoSteps, wireframes, menuChips,
+    };
+  }
+}
+</script>
+</body>
+</html>
