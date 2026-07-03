@@ -46,15 +46,19 @@ pnpm db:studio
 
 ตาราง: `recipes`, `ingredients`, `recipe_ingredients` (flag `isRequired` = วัตถุดิบบังคับ, `isProtein` = โปรตีนหลัก) — client จะได้ของใหม่ในการ sync รอบถัดไปโดยอัตโนมัติ
 
-## Deploy (Render)
+## Deploy (Render + Supabase)
 
-repo นี้มี [`render.yaml`](./render.yaml) (Blueprint) + [`Dockerfile`](./Dockerfile) พร้อมแล้ว:
+app รันบน Render, ฐานข้อมูลอยู่บน Supabase (ADR 0005) — repo มี [`render.yaml`](./render.yaml) + [`Dockerfile`](./Dockerfile) พร้อมแล้ว:
 
-1. เข้า https://dashboard.render.com/blueprints → **New Blueprint Instance** → เลือก repo นี้
-2. Render จะสร้าง web service `fridgechef` + Postgres `fridgechef-db` ให้เอง พร้อมต่อ `DATABASE_URL` อัตโนมัติ
+1. สร้างโปรเจกต์ที่ https://supabase.com/dashboard (region Singapore) แล้วไปหน้า **Connect** ก็อป connection string 2 ค่า:
+   - **Transaction pooler** (พอร์ต 6543) → ใช้เป็น `DATABASE_URL` โดยเติม `?pgbouncer=true&connection_limit=1` ต่อท้าย
+   - **Session pooler** (พอร์ต 5432) → ใช้เป็น `DIRECT_URL`
+2. เข้า https://dashboard.render.com/blueprints → **New Blueprint Instance** → เลือก repo นี้ → กรอก 2 ค่าข้างบนตอนที่มันถาม → Apply
 3. ตอนบูต container จะ `migrate deploy` เสมอ และ seed เฉพาะเมื่อ DB ว่าง — ข้อมูลที่แก้ผ่านหลังบ้านไม่ถูกทับ
 
-ข้อจำกัด free tier: service หลับเมื่อไม่มีคนใช้ (ตื่นช้า ~1 นาที) และ Postgres ฟรีมีอายุ 30 วัน (ต้องอัปเกรดถ้าใช้ยาว)
+แก้สูตรบน production: ใช้ **Table Editor** ใน Supabase dashboard ได้เลย
+
+ข้อจำกัด free tier: Render service หลับเมื่อไม่มีคนใช้ (ตื่น ~30–60 วิ) และ Supabase pause DB เมื่อไม่มีการใช้งาน ~1 สัปดาห์ (กด restore ใน dashboard ได้)
 
 ## ทดสอบ
 

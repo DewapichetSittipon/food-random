@@ -6,14 +6,8 @@ services:
     region: singapore
     healthCheckPath: /api/health
     envVars:
+      # ชี้ไป Supabase Postgres (ADR 0005) — กรอกค่าใน Render dashboard ตอน Apply blueprint
       - key: DATABASE_URL
-        fromDatabase:
-          name: fridgechef-db
-          property: connectionString
-
-databases:
-  - name: fridgechef-db
-    plan: free
-    region: singapore
-    databaseName: fridgechef
-    user: fridgechef
+        sync: false
+      - key: DIRECT_URL
+        sync: false

@@ -4,7 +4,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // runtime ผ่าน pooler ของ Supabase ได้ (pgbouncer) — ส่วน migrate ใช้ DIRECT_URL เสมอ
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Ingredient {
